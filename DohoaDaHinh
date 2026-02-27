@@ -1,0 +1,218 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DohoaDaHinh
+{
+    public class Quanly
+    {
+        public string tenPhanMem { get; set; }
+        public string developer { get; set; }
+        public double fee { get; set; }
+
+        public Quanly(string tenPhanMem, string developer, double fee)
+        {
+            this.tenPhanMem = tenPhanMem;
+            this.developer = developer;
+            this.fee = fee;
+        }
+        public double TinhChiPhi(int soThang)
+        {
+            return fee * soThang;
+        }
+        public double TinhGiamGia(int soThang, int phantram)
+        {
+            double tong = fee * soThang;
+            return tong - (tong * phantram / 100);
+        }
+        public override string ToString()
+        {
+            return ($"Software:{tenPhanMem}, Developer:{developer},Fee:{fee}");
+        }
+    }
+    public class Design : Quanly
+    {
+        public int Version;
+        public bool Cloud;
+        public Design(string tenPhanMem, string developer, double fee, int Version, bool Cloud) : base(tenPhanMem, developer, fee)
+        {
+            this.Version = Version;
+            this.Cloud = Cloud;
+        }
+        public override string ToString()
+        {
+            return base.ToString() + $", Phiên bản: {Version}" + $", Hỗ trợ Cloud: {(Cloud ? "Có" : "Không")}";
+
+        }
+    }
+    public class Tools : Quanly
+    {
+        public string Model;
+        public int VRam;
+        public Tools(string tenPhanMem, string developer, double fee, string Model, int VRam) : base(tenPhanMem, developer, fee)
+        {
+            this.Model = Model;
+            this.VRam = VRam;
+        }
+        public override string ToString()
+        {
+            return base.ToString() + $" mô hình: {Model}" + $"Ram: {VRam}";
+
+        }
+    }
+    public class Manager
+    {
+        List<Quanly> ListSoftware = new List<Quanly>();
+        public void Add(Quanly software)
+        {
+            ListSoftware.Add(software);
+        }
+        public void Show()
+        {
+            foreach (Quanly software in ListSoftware)
+            {
+                software.ToString();
+            }
+        }
+        public List<Quanly> GetAll()
+        {
+            return ListSoftware;
+        }
+        public List<Quanly> SearchName(string name)
+        {
+            List<Quanly> ketQua = new List<Quanly>();
+
+            foreach (Quanly software in ListSoftware)
+            {
+                if (software.tenPhanMem == name)
+                {
+                    ketQua.Add(software);
+                }
+            }
+
+            return ketQua;
+        }
+        public List<Tools> LocTheoVRam(int vramMay)
+        {
+            List<Tools> ketQua = new List<Tools>();
+
+            foreach (Quanly software in ListSoftware)
+            {
+                if (software is Tools tool)
+                {
+                    if (tool.VRam <= vramMay)
+                    {
+                        ketQua.Add(tool);
+                    }
+                }
+            }
+
+            return ketQua;
+        }
+
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Manager s = new Manager();
+            int choice;
+
+            do
+            {
+                Console.WriteLine("1. Thêm mới Phần mềm thiết kế");
+                Console.WriteLine("2.Thêm mới Công cụ/ phần mềm ");
+                Console.WriteLine("3. Hiển thị tất cả phần mềm");
+                Console.WriteLine("4. Tìm theo tên");
+                Console.WriteLine("5. Lọc / phần mềm theo VRAM.");
+                Console.WriteLine("6.Tính chi phí thuê phần mềm.");
+                Console.WriteLine("7. Thoát");
+                Console.Write("Chọn: ");
+                choice = int.Parse(Console.ReadLine());
+
+                switch (choice)
+                {
+                   
+                    case 1:
+                        
+                        Console.Write("tên phần mềm ");
+                        string name = Console.ReadLine();
+                        Console.Write("nhà phát triển ");
+                        string dev = (Console.ReadLine());
+                        Console.Write("phí ");
+                        double panel = double.Parse(Console.ReadLine());
+                       
+
+                        s.Add(new Quanly( name, dev, panel));
+                        break;
+                    case 2:
+                        Console.Write("Tên: ");
+                        string tname = Console.ReadLine();
+
+                        Console.Write("Developer: ");
+                        string tdev = Console.ReadLine();
+
+                        Console.Write("Phí tháng: ");
+                        double tfee = double.Parse(Console.ReadLine());
+
+                        Console.Write("Model: ");
+                        string model = Console.ReadLine();
+
+                        Console.Write("VRAM yêu cầu: ");
+                        int vram = int.Parse(Console.ReadLine());
+
+                        s.Add(new Tools(tname, tdev, tfee, model, vram));
+                        break;
+
+                    case 3:
+                        s.Show();
+                        break;
+                    case 4:
+                        Console.Write("Nhập tên cần tìm: ");
+                        string search = Console.ReadLine();
+                        var result = s.SearchName(search);
+
+                        foreach (var item in result)
+                            Console.WriteLine(item);
+                        break;
+                    case 5:
+                        Console.Write("Nhập VRAM máy: ");
+                        int vramMay = int.Parse(Console.ReadLine());
+
+                        var ds = s.LocTheoVRam(vramMay);
+
+                        foreach (var item in ds)
+                            Console.WriteLine(item);
+                        break;
+
+                    case 6:
+                        Console.Write("Nhập tên phần mềm: ");
+                        string ten = Console.ReadLine();
+
+                        Console.Write("Số tháng: ");
+                        int thang = int.Parse(Console.ReadLine());
+
+                        Console.Write("Giảm giá (%): ");
+                        int giam = int.Parse(Console.ReadLine());
+
+                        foreach (var item in s.GetAll())
+                        {
+                            if (item.tenPhanMem == ten)
+                            {
+                                double tong = giam == 0 ?
+                                    item.TinhChiPhi(thang) :
+                                    item.TinhGiamGia(thang, giam);
+
+                                Console.WriteLine("Tổng tiền: " + tong);
+                            }
+                        }
+                        break;
+                }
+
+            }
+            while(choice!=7);
+
+    } }
+}
